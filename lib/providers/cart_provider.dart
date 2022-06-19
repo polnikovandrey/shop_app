@@ -35,5 +35,8 @@ class CartProvider with ChangeNotifier {
         ),
       );
     }
+    notifyListeners();
   }
+
+  int get itemCount => _items.length;
 }

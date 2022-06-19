@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:shop_app/providers/cart_provider.dart';
+import 'package:shop_app/widgets/badge.dart';
 import 'package:shop_app/widgets/products_grid.dart';
 
-enum FilterOptions {
-  favorites, all
-}
+enum FilterOptions { favorites, all }
 
 class ProductsOverviewScreen extends StatefulWidget {
   static const routeName = '/products_overview';
@@ -36,7 +37,17 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
                 child: Text('Show All'),
               )
             ],
-          )
+          ),
+          Consumer<CartProvider>(
+            builder: (context, cartProvider, child) => Badge(
+              value: cartProvider.itemCount.toString(),
+              child: child,
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.shopping_cart),
+              onPressed: () {},
+            ),
+          ),
         ],
       ),
       body: ProductsGrid(showOnlyFavorites: _showOnlyFavorites),
