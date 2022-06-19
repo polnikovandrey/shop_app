@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:shop_app/screens/product_detail_screen.dart';
 import 'package:shop_app/screens/products_overview_screen.dart';
 
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
+  static const rootRouteName = '/';
+
   const MyApp({Key? key}) : super(key: key);
 
   @override
@@ -18,7 +21,11 @@ class MyApp extends StatelessWidget {
         ),
         fontFamily: 'Lato',
       ),
-      home: ProductsOverviewScreen(),
+      initialRoute: ProductsOverviewScreen.routeName,
+      routes: {
+        ProductsOverviewScreen.routeName: (ctx) => ProductsOverviewScreen(),
+        ProductDetailScreen.routeName: (ctx) => ProductDetailScreen(),
+      },
     );
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shop_app/models/product.dart';
+import 'package:shop_app/screens/product_detail_screen.dart';
 
 class ProductItem extends StatelessWidget {
   final Product _product;
@@ -28,9 +29,15 @@ class ProductItem extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
         ),
-        child: Image.network(
-          _product.imageUrl,
-          fit: BoxFit.cover,
+        child: GestureDetector(
+          onTap: () => Navigator.of(context).pushNamed(
+            ProductDetailScreen.routeName,
+            arguments: _product.id,
+          ),
+          child: Image.network(
+            _product.imageUrl,
+            fit: BoxFit.cover,
+          ),
         ),
       ),
     );

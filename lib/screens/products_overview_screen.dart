@@ -3,6 +3,8 @@ import 'package:shop_app/models/product.dart';
 import 'package:shop_app/widgets/product_item.dart';
 
 class ProductsOverviewScreen extends StatelessWidget {
+  static const routeName = '/products_overview';
+
   final List<Product> loadedProducts = [
     Product(
       id: 'p1',
