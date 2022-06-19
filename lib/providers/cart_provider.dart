@@ -39,4 +39,6 @@ class CartProvider with ChangeNotifier {
   }
 
   int get itemCount => _items.length;
+
+  double get totalAmount => _items.isEmpty ? 0.0 : _items.values.map((item) => item.price * item.quantity).reduce((value, element) => value + element);
 }
