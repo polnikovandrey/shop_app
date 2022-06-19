@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:shop_app/models/product.dart';
 import 'package:shop_app/screens/product_detail_screen.dart';
 
 class ProductItem extends StatelessWidget {
-  final Product _product;
+  final String _id;
+  final String _title;
+  final String _imageUrl;
 
-  const ProductItem(this._product, {Key? key}) : super(key: key);
+  const ProductItem({required String id, required String title, required String imageUrl, Key? key})
+      : _id = id,
+        _title = title,
+        _imageUrl = imageUrl,
+        super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -25,17 +30,17 @@ class ProductItem extends StatelessWidget {
             onPressed: () {},
           ),
           title: Text(
-            _product.title,
+            _title,
             textAlign: TextAlign.center,
           ),
         ),
         child: GestureDetector(
           onTap: () => Navigator.of(context).pushNamed(
             ProductDetailScreen.routeName,
-            arguments: _product.id,
+            arguments: _id,
           ),
           child: Image.network(
-            _product.imageUrl,
+            _imageUrl,
             fit: BoxFit.cover,
           ),
         ),
