@@ -50,7 +50,7 @@ class CartProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void clearItems() {
+  void clear() {
     _items.clear();
     notifyListeners();
   }
