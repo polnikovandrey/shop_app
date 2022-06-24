@@ -50,6 +50,19 @@ class CartProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  void removeSingleItem(String productId) {
+    var item = _items[productId];
+    if (item != null) {
+      if (item.quantity > 1) {
+        _items.update(productId, (value) => CartItemData(id: value.id, productId: value.productId, title: value.title, price: value.price, quantity: value.quantity - 1));
+      } else {
+        _items.remove(productId);
+      }
+      notifyListeners();
+    }
+
+  }
+
   void clear() {
     _items.clear();
     notifyListeners();
