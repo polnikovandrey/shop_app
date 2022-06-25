@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:shop_app/providers/product.dart';
 
 class ProductsProvider with ChangeNotifier {
-
   final List<Product> _items = [
     Product(
       id: 'p1',
@@ -40,8 +39,16 @@ class ProductsProvider with ChangeNotifier {
 
   Product findById(String id) => _items.firstWhere((element) => element.id == id);
 
-  void addProduct() {
-    // TODO implement
+  void addProduct(Product product) {
+    final newProduct = Product(
+      id: DateTime.now().toString(),
+      title: product.title,
+      price: product.price,
+      imageUrl: product.imageUrl,
+      description: product.description,
+      isFavorite: product.isFavorite,
+    );
+    _items.insert(0, newProduct);
     notifyListeners();
   }
 }
