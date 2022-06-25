@@ -31,6 +31,7 @@ class UserProductsScreen extends StatelessWidget {
           itemBuilder: (ctx, index) {
             var product = products.items[index];
             return UserProductItem(
+              id: product.id,
               title: product.title,
               imageUrl: product.imageUrl,
               key: ValueKey(product.id),

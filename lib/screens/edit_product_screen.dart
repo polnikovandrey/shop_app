@@ -19,6 +19,13 @@ class _EditProductScreenState extends State<EditProductScreen> {
   final _imageUrlController = TextEditingController();
   final _form = GlobalKey<FormState>();
   var _editedProduct = Product(id: '', title: '', price: 0, description: '', imageUrl: '');
+  var _initValues = {
+    'title': '',
+    'description': '',
+    'price': '',
+    'imageUrl': '',
+  };
+  var _isInitialized = false;
 
   @override
   void initState() {
@@ -34,6 +41,26 @@ class _EditProductScreenState extends State<EditProductScreen> {
     _imageUrlFocusNode.removeListener(_updateImageUrl);
     _imageUrlFocusNode.dispose();
     _imageUrlController.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_isInitialized) {
+      var routeArguments = ModalRoute.of(context)?.settings.arguments;
+      final productId = routeArguments == null ? null : routeArguments as String;
+      if (productId != null) {
+        _editedProduct = Provider.of<ProductsProvider>(context, listen: false).findById(productId);
+        _initValues = {
+          'title': _editedProduct.title,
+          'description': _editedProduct.description,
+          'price': _editedProduct.price.toString(),
+          'imageUrl': '',
+        };
+        _imageUrlController.text = _editedProduct.imageUrl;
+      }
+      _isInitialized = true;
+    }
   }
 
   @override
@@ -56,6 +83,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
             child: Column(
               children: [
                 TextFormField(
+                  initialValue: _initValues['title'],
                   decoration: const InputDecoration(labelText: 'Title'),
                   textInputAction: TextInputAction.next,
                   onFieldSubmitted: (value) => FocusScope.of(context).requestFocus(_priceFocusNode),
@@ -72,6 +100,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
                   },
                 ),
                 TextFormField(
+                  initialValue: _initValues['price'],
                   decoration: const InputDecoration(labelText: 'Price'),
                   textInputAction: TextInputAction.next,
                   keyboardType: TextInputType.number,
@@ -100,6 +129,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
                   },
                 ),
                 TextFormField(
+                  initialValue: _initValues['description'],
                   decoration: const InputDecoration(labelText: 'Description'),
                   maxLines: 3,
                   keyboardType: TextInputType.multiline,
@@ -183,9 +213,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
   void _updateImageUrl() {
     if (!_imageUrlFocusNode.hasFocus) {
       var value = _imageUrlController.value.text;
-      if (value.isEmpty ||
-          ((value.startsWith('http') || value.startsWith('https'))
-              && (value.endsWith('.png') || value.endsWith('.jpg') || value.endsWith('.jpeg')))) {
+      if (value.isEmpty || ((value.startsWith('http') || value.startsWith('https')) && (value.endsWith('.png') || value.endsWith('.jpg') || value.endsWith('.jpeg')))) {
         setState(() {});
       }
     }
@@ -195,7 +223,12 @@ class _EditProductScreenState extends State<EditProductScreen> {
     var formState = _form.currentState;
     if (formState != null && formState.validate()) {
       formState.save();
-      Provider.of<ProductsProvider>(context, listen: false).addProduct(_editedProduct);
+      final products = Provider.of<ProductsProvider>(context, listen: false);
+      if (_editedProduct.id.isEmpty) {
+        products.addProduct(_editedProduct);
+      } else {
+        products.updateProduct(_editedProduct);
+      }
       Navigator.of(context).pop();
     }
   }
