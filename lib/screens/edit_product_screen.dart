@@ -231,7 +231,23 @@ class _EditProductScreenState extends State<EditProductScreen> {
       setState(() => _isLoading = true);
       final products = Provider.of<ProductsProvider>(context, listen: false);
       if (_editedProduct.id.isEmpty) {
-        products.addProduct(_editedProduct).then((value) {
+        products.addProduct(_editedProduct).catchError((error) {
+          return showDialog<void>(
+            context: context,
+            builder: (ctx) => AlertDialog(
+              title: const Text('An error occurred'),
+              content: const Text('Something went wrong'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(ctx).pop(),
+                  child: const Text('Ok'),
+                ),
+              ],
+            ),
+          ).then((value) {
+            return null;
+          });
+        }).then((value) {
           _isLoading = false;
           Navigator.of(context).pop();
           return null;
