@@ -57,6 +57,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
                   decoration: const InputDecoration(labelText: 'Title'),
                   textInputAction: TextInputAction.next,
                   onFieldSubmitted: (value) => FocusScope.of(context).requestFocus(_priceFocusNode),
+                  validator: (value) => value == null || value.isEmpty ? 'Please enter a title' : null,
                   onSaved: (value) {
                     _editedProduct = Product(
                       id: _editedProduct.id,
@@ -74,6 +75,17 @@ class _EditProductScreenState extends State<EditProductScreen> {
                   keyboardType: TextInputType.number,
                   focusNode: _priceFocusNode,
                   onFieldSubmitted: (_) => FocusScope.of(context).requestFocus(_descriptionFocusNode),
+                  validator: (value) {
+                    String? validationMessage;
+                    if (value == null || value.isEmpty) {
+                      validationMessage = 'Please enter a price';
+                    } else if (double.tryParse(value) == null) {
+                      validationMessage = 'Please enter a valid number';
+                    } else if (double.parse(value) <= 0) {
+                      validationMessage = 'Please enter a positive number';
+                    }
+                    return validationMessage;
+                  },
                   onSaved: (value) {
                     _editedProduct = Product(
                       id: _editedProduct.id,
@@ -90,6 +102,15 @@ class _EditProductScreenState extends State<EditProductScreen> {
                   maxLines: 3,
                   keyboardType: TextInputType.multiline,
                   focusNode: _descriptionFocusNode,
+                  validator: (value) {
+                    String? validationMessage;
+                    if (value == null || value.isEmpty) {
+                      validationMessage = 'Please enter a description';
+                    } else if (value.length < 10) {
+                      validationMessage = 'Should be at least 10 characters long';
+                    }
+                    return validationMessage;
+                  },
                   onSaved: (value) {
                     _editedProduct = Product(
                       id: _editedProduct.id,
@@ -124,6 +145,17 @@ class _EditProductScreenState extends State<EditProductScreen> {
                         controller: _imageUrlController,
                         focusNode: _imageUrlFocusNode,
                         onFieldSubmitted: (_) => _saveForm(),
+                        validator: (value) {
+                          String? validationMessage;
+                          if (value == null || value.isEmpty) {
+                            validationMessage = 'Please enter an image URL';
+                          } else if (!value.startsWith('http') || !value.startsWith('https')) {
+                            validationMessage = 'Please enter a valid URL';
+                          } else if (!value.endsWith('.png') && !value.endsWith('.jpg') && !value.endsWith('.jpeg')) {
+                            validationMessage = 'Please enter a valid image URL';
+                          }
+                          return validationMessage;
+                        },
                         onSaved: (value) {
                           _editedProduct = Product(
                             id: _editedProduct.id,
@@ -148,13 +180,18 @@ class _EditProductScreenState extends State<EditProductScreen> {
 
   void _updateImageUrl() {
     if (!_imageUrlFocusNode.hasFocus) {
-      setState(() {});
+      var value = _imageUrlController.value.text;
+      if (value.isEmpty ||
+          ((value.startsWith('http') || value.startsWith('https'))
+              && (value.endsWith('.png') || value.endsWith('.jpg') || value.endsWith('.jpeg')))) {
+        setState(() {});
+      }
     }
   }
 
   void _saveForm() {
     var formState = _form.currentState;
-    if (formState != null) {
+    if (formState != null && formState.validate()) {
       formState.save();
     }
   }
