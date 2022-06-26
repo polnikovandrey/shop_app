@@ -3,15 +3,18 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shop_app/models/http_exception.dart';
 import 'package:shop_app/providers/product.dart';
 
 class ProductsProvider with ChangeNotifier {
-  static const emptyString = '';
   static const authority = 'flutter-shop-app-cfa87-default-rtdb.asia-southeast1.firebasedatabase.app';
   static const productsCollectionPath = '/products';
   static const dotJson = '.json';
-  static const productsCollectionJsonPath = '$productsCollectionPath$dotJson';
-  static final productsCollectionUri = Uri.https(authority, productsCollectionJsonPath);
+  static final productsCollectionUri = Uri.https(authority, '$productsCollectionPath$dotJson');
+
+  static Uri buildProductIdUri(String id) {
+    return Uri.https(authority, '$productsCollectionPath/$id/$dotJson');
+  }
 
   final List<Product> _items = [];
   bool _initialized = false;
@@ -123,7 +126,7 @@ class ProductsProvider with ChangeNotifier {
   Future<void> updateProduct(Product product) async {
     var index = _items.indexWhere((prod) => product.id == prod.id);
     if (index != -1) {
-      final uri = _buildProductIdUri(product.id);
+      final uri = buildProductIdUri(product.id);
       final response = await http.patch(uri,
           body: json.encode({
             'title': product.title,
@@ -143,16 +146,12 @@ class ProductsProvider with ChangeNotifier {
     final existingProduct = _items[existingProductIndex];
     _items.removeAt(existingProductIndex);
     notifyListeners();
-    final uri = _buildProductIdUri(id);
+    final uri = buildProductIdUri(id);
     final response = await http.delete(uri);
     if (response.statusCode != HttpStatus.ok) {
       _items.insert(existingProductIndex, existingProduct);
       notifyListeners();
-      throw const HttpException('Could not delete a product');
+      throw HttpException('Could not delete a product');
     }
-  }
-
-  Uri _buildProductIdUri(String id) {
-    return Uri.https(authority, '$productsCollectionPath/$id/$dotJson');
   }
 }
