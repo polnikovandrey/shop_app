@@ -1,8 +1,8 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:http/http.dart';
 import 'package:shop_app/providers/product.dart';
 
 class ProductsProvider with ChangeNotifier {
@@ -90,8 +90,8 @@ class ProductsProvider with ChangeNotifier {
   }
 
   Future<void> addProduct(Product product) async {
-    try {
-      final response = await _storeProduct(product);
+    final response = await _storeProduct(product);
+    if (response.statusCode == HttpStatus.ok) {
       final newProduct = Product(
         id: json.decode(response.body)['name'],
         title: product.title,
@@ -102,13 +102,10 @@ class ProductsProvider with ChangeNotifier {
       );
       _items.insert(0, newProduct);
       notifyListeners();
-    } catch (error) {
-      print(error);
-      rethrow;
     }
   }
 
-  Future<Response> _storeProduct(Product product) async {
+  Future<http.Response> _storeProduct(Product product) async {
     return await http.post(
       productsCollectionUri,
       body: json.encode(
@@ -126,21 +123,36 @@ class ProductsProvider with ChangeNotifier {
   Future<void> updateProduct(Product product) async {
     var index = _items.indexWhere((prod) => product.id == prod.id);
     if (index != -1) {
-      final uri = Uri.https(authority, '$productsCollectionPath/${product.id}/$dotJson');
-      await http.patch(uri,
+      final uri = _buildProductIdUri(product.id);
+      final response = await http.patch(uri,
           body: json.encode({
             'title': product.title,
             'description': product.description,
             'imageUrl': product.imageUrl,
             'price': product.price,
           }));
-      _items[index] = product;
-      notifyListeners();
+      if (response.statusCode == HttpStatus.ok) {
+        _items[index] = product;
+        notifyListeners();
+      }
     }
   }
 
-  void deleteProduct(String id) {
-    _items.removeWhere((element) => element.id == id);
+  Future<void> deleteProduct(String id) async {
+    final existingProductIndex = _items.indexWhere((product) => product.id == id);
+    final existingProduct = _items[existingProductIndex];
+    _items.removeAt(existingProductIndex);
     notifyListeners();
+    final uri = _buildProductIdUri(id);
+    final response = await http.delete(uri);
+    if (response.statusCode != HttpStatus.ok) {
+      _items.insert(existingProductIndex, existingProduct);
+      notifyListeners();
+      throw const HttpException('Could not delete a product');
+    }
+  }
+
+  Uri _buildProductIdUri(String id) {
+    return Uri.https(authority, '$productsCollectionPath/$id/$dotJson');
   }
 }
