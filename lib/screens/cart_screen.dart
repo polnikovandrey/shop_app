@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shop_app/providers/cart_provider.dart' show CartProvider;
-import 'package:shop_app/providers/orders_provider.dart';
 import 'package:shop_app/widgets/cart_item.dart' as ci;
+import 'package:shop_app/widgets/order_button.dart';
 
 class CartScreen extends StatelessWidget {
   static const routeName = '/cart';
@@ -37,13 +37,7 @@ class CartScreen extends StatelessWidget {
                       style: Theme.of(context).primaryTextTheme.bodyMedium,
                     ),
                   ),
-                  TextButton(
-                    onPressed: () {
-                      Provider.of<OrdersProvider>(context, listen: false).addOrder(cart.items.values.toList(), cart.totalAmount);
-                      cart.clear();
-                    },
-                    child: const Text('Order Now'),
-                  ),
+                  OrderButton(cart: cart),
                 ],
               ),
             ),
@@ -51,19 +45,18 @@ class CartScreen extends StatelessWidget {
           const SizedBox(height: 10),
           Expanded(
             child: ListView.builder(
-              itemCount: cart.itemCount,
-              itemBuilder: (ctx, index) {
-                var cartItem = cart.items.values.toList()[index];
-                return ci.CartItem(
-                  id: cartItem.id,
-                  productId: cartItem.productId,
-                  title: cartItem.title,
-                  price: cartItem.price,
-                  quantity: cartItem.quantity,
-                  key: ValueKey(cartItem.id),
-                );
-              }
-            ),
+                itemCount: cart.itemCount,
+                itemBuilder: (ctx, index) {
+                  var cartItem = cart.items.values.toList()[index];
+                  return ci.CartItem(
+                    id: cartItem.id,
+                    productId: cartItem.productId,
+                    title: cartItem.title,
+                    price: cartItem.price,
+                    quantity: cartItem.quantity,
+                    key: ValueKey(cartItem.id),
+                  );
+                }),
           ),
         ],
       ),

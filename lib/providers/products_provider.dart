@@ -3,17 +3,17 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shop_app/global_constants.dart';
 import 'package:shop_app/models/http_exception.dart';
 import 'package:shop_app/providers/product.dart';
 
 class ProductsProvider with ChangeNotifier {
-  static const authority = 'flutter-shop-app-cfa87-default-rtdb.asia-southeast1.firebasedatabase.app';
+
   static const productsCollectionPath = '/products';
-  static const dotJson = '.json';
-  static final productsCollectionUri = Uri.https(authority, '$productsCollectionPath$dotJson');
+  static final productsCollectionUri = Uri.https(GlobalConstants.authority, '$productsCollectionPath${GlobalConstants.dotJson}');
 
   static Uri buildProductIdUri(String id) {
-    return Uri.https(authority, '$productsCollectionPath/$id/$dotJson');
+    return Uri.https(GlobalConstants.authority, '$productsCollectionPath/$id/${GlobalConstants.dotJson}');
   }
 
   final List<Product> _items = [];
