@@ -42,10 +42,8 @@ class AuthScreen extends StatelessWidget {
                   Flexible(
                     child: Container(
                       margin: const EdgeInsets.only(bottom: 20.0),
-                      padding:
-                      const EdgeInsets.symmetric(vertical: 8.0, horizontal: 94.0),
-                      transform: Matrix4.rotationZ(-8 * pi / 180)
-                        ..translate(-10.0),
+                      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 94.0),
+                      transform: Matrix4.rotationZ(-8 * pi / 180)..translate(-10.0),
                       // ..translate(-10.0),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20),
@@ -143,8 +141,7 @@ class AuthCardState extends State<AuthCard> {
       elevation: 8.0,
       child: Container(
         height: _authMode == AuthMode.signup ? 320 : 260,
-        constraints:
-        BoxConstraints(minHeight: _authMode == AuthMode.signup ? 320 : 260),
+        constraints: BoxConstraints(minHeight: _authMode == AuthMode.signup ? 320 : 260),
         width: deviceSize.width * 0.75,
         padding: const EdgeInsets.all(16.0),
         child: Form(
@@ -187,13 +184,13 @@ class AuthCardState extends State<AuthCard> {
                     obscureText: true,
                     validator: _authMode == AuthMode.signup
                         ? (value) {
-                      if (value != _passwordController.text) {
-                        return 'Passwords do not match!';
-                      } else {
-                        return null;
-                      }
-                    }
-                    : null,
+                            if (value != _passwordController.text) {
+                              return 'Passwords do not match!';
+                            } else {
+                              return null;
+                            }
+                          }
+                        : null,
                   ),
                 const SizedBox(
                   height: 20,
