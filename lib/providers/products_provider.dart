@@ -42,38 +42,36 @@ class ProductsProvider with ChangeNotifier {
 
   Product findById(String id) => _items.firstWhere((element) => element.id == id);
 
-  Future<void> addProduct(Product product) {
-    final uri = Uri.https('flutter-shop-app-cfa87-default-rtdb.asia-southeast1.firebasedatabase.app', '/products');
-    return http
-        .post(
-      uri,
-      body: json.encode(
-        {
-          "title": product.title,
-          "description": product.description,
-          "price": product.price,
-          "imageUrl": product.imageUrl,
-          "isFavorite": product.isFavorite,
-        },
-      ),
-    )
-        .then(
-      (response) {
-        final newProduct = Product(
-          id: json.decode(response.body)['name'],
-          title: product.title,
-          description: product.description,
-          price: product.price,
-          imageUrl: product.imageUrl,
-          isFavorite: product.isFavorite,
-        );
-        _items.insert(0, newProduct);
-        notifyListeners();
-      }
-    ).catchError((error) {
+  Future<void> addProduct(Product product) async {
+    final uri = Uri.https('flutter-shop-app-cfa87-default-rtdb.asia-southeast1.firebasedatabase.app', '/products.json');
+    try {
+      final response = await http
+          .post(
+        uri,
+        body: json.encode(
+          {
+            "title": product.title,
+            "description": product.description,
+            "price": product.price,
+            "imageUrl": product.imageUrl,
+            "isFavorite": product.isFavorite,
+          },
+        ),
+      );
+      final newProduct = Product(
+        id: json.decode(response.body)['name'],
+        title: product.title,
+        description: product.description,
+        price: product.price,
+        imageUrl: product.imageUrl,
+        isFavorite: product.isFavorite,
+      );
+      _items.insert(0, newProduct);
+      notifyListeners();
+    } catch (error) {
       print(error);
-      throw error;
-    });
+      rethrow;
+    }
   }
 
   void updateProduct(Product product) {
