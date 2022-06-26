@@ -233,7 +233,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
       if (_editedProduct.id.isEmpty) {
         try {
           await products.addProduct(_editedProduct);
-        } catch (error) {
+        } catch(error) {
           await showDialog<void>(
               context: context,
               builder: (ctx) => AlertDialog(

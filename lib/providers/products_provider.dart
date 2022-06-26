@@ -42,6 +42,12 @@ class ProductsProvider with ChangeNotifier {
 
   Product findById(String id) => _items.firstWhere((element) => element.id == id);
 
+  Future<void> fetchAndSetProducts() async {
+    final uri = Uri.https('flutter-shop-app-cfa87-default-rtdb.asia-southeast1.firebasedatabase.app', '/products.json');
+    final response = await http.get(uri);
+    print(json.decode(response.body));
+  }
+
   Future<void> addProduct(Product product) async {
     final uri = Uri.https('flutter-shop-app-cfa87-default-rtdb.asia-southeast1.firebasedatabase.app', '/products.json');
     try {
@@ -68,7 +74,7 @@ class ProductsProvider with ChangeNotifier {
       );
       _items.insert(0, newProduct);
       notifyListeners();
-    } catch (error) {
+    } catch(error) {
       print(error);
       rethrow;
     }
