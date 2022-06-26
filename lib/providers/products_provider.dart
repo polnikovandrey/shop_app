@@ -74,21 +74,23 @@ class ProductsProvider with ChangeNotifier {
   }
 
   Future<List<Product>> _loadProducts() async {
-    final response = await http.get(productsCollectionUri);
-    final extractedData = json.decode(response.body) as Map<String, dynamic>;
     final List<Product> loadedProducts = [];
-    extractedData.forEach((key, value) {
-      final productId = key;
-      final productData = value;
-      loadedProducts.add(Product(
-        id: productId,
-        title: productData['title'],
-        description: productData['description'],
-        price: productData['price'],
-        imageUrl: productData['imageUrl'],
-        isFavorite: productData['isFavorite'],
-      ));
-    });
+    final response = await http.get(productsCollectionUri);
+    final extractedData = json.decode(response.body);
+    if (extractedData != null) {
+      extractedData.forEach((key, value) {
+        final productId = key;
+        final productData = value;
+        loadedProducts.add(Product(
+          id: productId,
+          title: productData['title'],
+          description: productData['description'],
+          price: productData['price'],
+          imageUrl: productData['imageUrl'],
+          isFavorite: productData['isFavorite'],
+        ));
+      });
+    }
     return loadedProducts;
   }
 
