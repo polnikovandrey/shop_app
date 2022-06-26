@@ -77,7 +77,7 @@ class ProductsProvider with ChangeNotifier {
     final List<Product> loadedProducts = [];
     final response = await http.get(productsCollectionUri);
     final extractedData = json.decode(response.body);
-    if (extractedData != null) {
+    if (response.statusCode == HttpStatus.ok) {
       extractedData.forEach((key, value) {
         final productId = key;
         final productData = value;
