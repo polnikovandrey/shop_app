@@ -16,8 +16,9 @@ class ProductsProvider with ChangeNotifier {
 
   Product findById(String id) => _items.firstWhere((element) => element.id == id);
 
-  Future<void> fetchAndSetProducts() async {
+  Future<void> deleteAllProductsAndSetDummyData() async {
     await http.delete(productsUri);
+    final List<Future<dynamic>> futures = [];
     for (var product in [
       Product(
         id: '',
@@ -48,8 +49,12 @@ class ProductsProvider with ChangeNotifier {
         imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg',
       ),
     ]) {
-      await _storeProduct(product);
+      futures.add(_storeProduct(product));
     }
+    await Future.wait(futures);
+  }
+
+  Future<void> fetchAndSetProducts() async {
     final products = await _loadProducts();
     _items.clear();
     _items.addAll(products);

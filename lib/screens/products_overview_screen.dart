@@ -28,7 +28,7 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
     super.didChangeDependencies();
     if (!_isInitialized) {
       _isInitialized = true;
-      _fetchAndSetProducts();
+      _reInitAndFetchAndSetProducts();
     }
   }
 
@@ -73,9 +73,11 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
     );
   }
 
-  Future<void> _fetchAndSetProducts() async {
+  Future<void> _reInitAndFetchAndSetProducts() async {
     setState(() => _isLoading = true);
-    await Provider.of<ProductsProvider>(context, listen: false).fetchAndSetProducts();
+    var productsProvider = Provider.of<ProductsProvider>(context, listen: false);
+    await productsProvider.deleteAllProductsAndSetDummyData();
+    await productsProvider.fetchAndSetProducts();
     setState(() => _isLoading = false);
   }
 }
