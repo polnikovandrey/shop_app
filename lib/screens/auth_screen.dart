@@ -206,9 +206,10 @@ class AuthCardState extends State<AuthCard> {
                     ),
                     child: Text(_authMode == AuthMode.login ? 'LOGIN' : 'SIGN UP'),
                   ),
-                ElevatedButton(
+                TextButton(
                   onPressed: _switchAuthMode,
                   style: ElevatedButton.styleFrom(
+                    primary: Colors.transparent,
                     padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 4.0),
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
