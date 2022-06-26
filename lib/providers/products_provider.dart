@@ -6,9 +6,15 @@ import 'package:http/http.dart';
 import 'package:shop_app/providers/product.dart';
 
 class ProductsProvider with ChangeNotifier {
-  static final productsUri = Uri.https('flutter-shop-app-cfa87-default-rtdb.asia-southeast1.firebasedatabase.app', '/products.json');
+  static const emptyString = '';
+  static const authority = 'flutter-shop-app-cfa87-default-rtdb.asia-southeast1.firebasedatabase.app';
+  static const productsCollectionPath = '/products';
+  static const dotJson = '.json';
+  static const productsCollectionJsonPath = '$productsCollectionPath$dotJson';
+  static final productsCollectionUri = Uri.https(authority, productsCollectionJsonPath);
 
   final List<Product> _items = [];
+  bool _initialized = false;
 
   List<Product> get items => [..._items];
 
@@ -17,41 +23,44 @@ class ProductsProvider with ChangeNotifier {
   Product findById(String id) => _items.firstWhere((element) => element.id == id);
 
   Future<void> deleteAllProductsAndSetDummyData() async {
-    await http.delete(productsUri);
-    final List<Future<dynamic>> futures = [];
-    for (var product in [
-      Product(
-        id: '',
-        title: 'Red Shirt',
-        description: 'A red shirt - it is pretty red!',
-        price: 29.99,
-        imageUrl: 'https://cdn.pixabay.com/photo/2016/10/02/22/17/red-t-shirt-1710578_1280.jpg',
-      ),
-      Product(
-        id: '',
-        title: 'Trousers',
-        description: 'A nice pair of trousers.',
-        price: 59.99,
-        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/Trousers%2C_dress_%28AM_1960.022-8%29.jpg/512px-Trousers%2C_dress_%28AM_1960.022-8%29.jpg',
-      ),
-      Product(
-        id: '',
-        title: 'Yellow Scarf',
-        description: 'Warm and cozy - exactly what you need for the winter.',
-        price: 19.99,
-        imageUrl: 'https://live.staticflickr.com/4043/4438260868_cc79b3369d_z.jpg',
-      ),
-      Product(
-        id: '',
-        title: 'A Pan',
-        description: 'Prepare any meal you want.',
-        price: 49.99,
-        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg',
-      ),
-    ]) {
-      futures.add(_storeProduct(product));
+    if (!_initialized) {
+      _initialized = true;
+      await http.delete(productsCollectionUri);
+      final List<Future<dynamic>> futures = [];
+      for (var product in [
+        Product(
+          id: '',
+          title: 'Red Shirt',
+          description: 'A red shirt - it is pretty red!',
+          price: 29.99,
+          imageUrl: 'https://cdn.pixabay.com/photo/2016/10/02/22/17/red-t-shirt-1710578_1280.jpg',
+        ),
+        Product(
+          id: '',
+          title: 'Trousers',
+          description: 'A nice pair of trousers.',
+          price: 59.99,
+          imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/Trousers%2C_dress_%28AM_1960.022-8%29.jpg/512px-Trousers%2C_dress_%28AM_1960.022-8%29.jpg',
+        ),
+        Product(
+          id: '',
+          title: 'Yellow Scarf',
+          description: 'Warm and cozy - exactly what you need for the winter.',
+          price: 19.99,
+          imageUrl: 'https://live.staticflickr.com/4043/4438260868_cc79b3369d_z.jpg',
+        ),
+        Product(
+          id: '',
+          title: 'A Pan',
+          description: 'Prepare any meal you want.',
+          price: 49.99,
+          imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg',
+        ),
+      ]) {
+        futures.add(_storeProduct(product));
+      }
+      await Future.wait(futures);
     }
-    await Future.wait(futures);
   }
 
   Future<void> fetchAndSetProducts() async {
@@ -62,7 +71,7 @@ class ProductsProvider with ChangeNotifier {
   }
 
   Future<List<Product>> _loadProducts() async {
-    final response = await http.get(productsUri);
+    final response = await http.get(productsCollectionUri);
     final extractedData = json.decode(response.body) as Map<String, dynamic>;
     final List<Product> loadedProducts = [];
     extractedData.forEach((key, value) {
@@ -101,7 +110,7 @@ class ProductsProvider with ChangeNotifier {
 
   Future<Response> _storeProduct(Product product) async {
     return await http.post(
-      productsUri,
+      productsCollectionUri,
       body: json.encode(
         {
           "title": product.title,
@@ -114,9 +123,17 @@ class ProductsProvider with ChangeNotifier {
     );
   }
 
-  void updateProduct(Product product) {
+  Future<void> updateProduct(Product product) async {
     var index = _items.indexWhere((prod) => product.id == prod.id);
     if (index != -1) {
+      final uri = Uri.https(authority, '$productsCollectionPath/${product.id}/$dotJson');
+      await http.patch(uri,
+          body: json.encode({
+            'title': product.title,
+            'description': product.description,
+            'imageUrl': product.imageUrl,
+            'price': product.price,
+          }));
       _items[index] = product;
       notifyListeners();
     }
