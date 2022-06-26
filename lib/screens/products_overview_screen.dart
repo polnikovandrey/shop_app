@@ -28,7 +28,7 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
     super.didChangeDependencies();
     if (!_isInitialized) {
       _isInitialized = true;
-      Provider.of<ProductsProvider>(context).fetchAndSetProducts();
+      Provider.of<ProductsProvider>(context, listen: false).fetchAndSetProducts();
     }
   }
 
