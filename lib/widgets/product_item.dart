@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:shop_app/providers/auth_provider.dart';
 import 'package:shop_app/providers/cart_provider.dart';
 import 'package:shop_app/screens/product_detail_screen.dart';
-import 'package:shop_app/uri_generator.dart';
 
 import '../providers/product_item_provider.dart';
 
@@ -24,7 +23,7 @@ class ProductItem extends StatelessWidget {
             builder: (context, product, child) => IconButton(
               icon: Icon(product.isFavorite ? Icons.favorite : Icons.favorite_border),
               color: Theme.of(context).colorScheme.secondary,
-              onPressed: () => product.toggleFavoriteStatus(UriGenerator.buildProductIdUri(id: product.id, token: auth.token)),
+              onPressed: () => product.toggleFavoriteStatus(auth.token),
             ),
           ),
           trailing: IconButton(
