@@ -27,7 +27,7 @@ class Product with ChangeNotifier {
     final oldStatus = isFavorite;
     isFavorite = !isFavorite;
     notifyListeners();
-    final uri = ProductsProvider.buildProductIdUri(id);
+    final uri = ProductsProvider.buildProductIdUri(id: id);
     try {
       final response = await http.patch(uri, body: json.encode({'isFavorite': isFavorite}));
       if (response.statusCode != HttpStatus.ok) {

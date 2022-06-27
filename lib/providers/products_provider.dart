@@ -8,16 +8,28 @@ import 'package:shop_app/models/http_exception.dart';
 import 'package:shop_app/providers/product.dart';
 
 class ProductsProvider with ChangeNotifier {
-
   static const productsCollectionPath = '/products';
-  static final productsCollectionUri = Uri.https(GlobalConstants.authority, '$productsCollectionPath${GlobalConstants.dotJson}');
 
-  static Uri buildProductIdUri(String id) {
-    return Uri.https(GlobalConstants.authority, '$productsCollectionPath/$id/${GlobalConstants.dotJson}');
+  static Uri buildProductsCollectionUri({String? token}) {
+    return Uri.https(GlobalConstants.authority, '$productsCollectionPath${GlobalConstants.dotJson}', _buildAuthQueryParameters(token));
   }
 
-  final List<Product> _items = [];
+  static Uri buildProductIdUri({required String id, String? token}) {
+    return Uri.https(GlobalConstants.authority, '$productsCollectionPath/$id/${GlobalConstants.dotJson}', _buildAuthQueryParameters(token));
+  }
+
+  static Map<String, String> _buildAuthQueryParameters(String? token) => token == null ? {} : {'auth': token};
+
+  final List<Product> _items;
+  final String? _token;
   bool _initialized = false;
+
+  ProductsProvider({List<Product>? items, String? token, bool? initialized})
+      : _items = items ?? [],
+        _token = token,
+        _initialized = initialized ?? false;
+
+  bool get initialized => _initialized;
 
   List<Product> get items => [..._items];
 
@@ -28,7 +40,7 @@ class ProductsProvider with ChangeNotifier {
   Future<void> deleteAllProductsAndSetDummyData() async {
     if (!_initialized) {
       _initialized = true;
-      await http.delete(productsCollectionUri);
+      await http.delete(buildProductsCollectionUri(token: _token));
       final List<Future<dynamic>> futures = [];
       for (var product in [
         Product(
@@ -75,7 +87,7 @@ class ProductsProvider with ChangeNotifier {
 
   Future<List<Product>> _loadProducts() async {
     final List<Product> loadedProducts = [];
-    final response = await http.get(productsCollectionUri);
+    final response = await http.get(buildProductsCollectionUri(token: _token));
     final extractedData = json.decode(response.body);
     if (response.statusCode == HttpStatus.ok) {
       extractedData.forEach((key, value) {
@@ -112,7 +124,7 @@ class ProductsProvider with ChangeNotifier {
 
   Future<http.Response> _storeProduct(Product product) async {
     return await http.post(
-      productsCollectionUri,
+      buildProductsCollectionUri(token: _token),
       body: json.encode(
         {
           "title": product.title,
@@ -128,7 +140,7 @@ class ProductsProvider with ChangeNotifier {
   Future<void> updateProduct(Product product) async {
     var index = _items.indexWhere((prod) => product.id == prod.id);
     if (index != -1) {
-      final uri = buildProductIdUri(product.id);
+      final uri = buildProductIdUri(id: product.id);
       final response = await http.patch(uri,
           body: json.encode({
             'title': product.title,
@@ -148,7 +160,7 @@ class ProductsProvider with ChangeNotifier {
     final existingProduct = _items[existingProductIndex];
     _items.removeAt(existingProductIndex);
     notifyListeners();
-    final uri = buildProductIdUri(id);
+    final uri = buildProductIdUri(id: id);
     final response = await http.delete(uri);
     if (response.statusCode != HttpStatus.ok) {
       _items.insert(existingProductIndex, existingProduct);
