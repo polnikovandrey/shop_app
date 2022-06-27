@@ -8,14 +8,15 @@ import 'package:shop_app/providers/product_item_provider.dart';
 import 'package:shop_app/uri_generator.dart';
 
 class ProductsProvider with ChangeNotifier {
-
   final List<ProductItemProvider> _items;
   final String? _token;
+  final String? _userId;
   bool _initialized = false;
 
-  ProductsProvider({List<ProductItemProvider>? items, String? token, bool? initialized})
+  ProductsProvider({List<ProductItemProvider>? items, String? token, String? userId, bool? initialized})
       : _items = items ?? [],
         _token = token,
+        _userId = userId,
         _initialized = initialized ?? false;
 
   bool get initialized => _initialized;
@@ -76,10 +77,12 @@ class ProductsProvider with ChangeNotifier {
 
   Future<List<ProductItemProvider>> _loadProducts() async {
     final List<ProductItemProvider> loadedProducts = [];
-    final response = await http.get(UriGenerator.buildProductsCollectionUri(token: _token));
-    final extractedData = json.decode(response.body);
-    if (response.statusCode == HttpStatus.ok) {
-      extractedData.forEach((key, value) {
+    final productsResponse = await http.get(UriGenerator.buildProductsCollectionUri(token: _token));
+    final extractedData = json.decode(productsResponse.body) as Map<String, dynamic>?;
+    if (productsResponse.statusCode == HttpStatus.ok && extractedData != null && extractedData.isNotEmpty) {
+      final favoritesResponse = await http.get(UriGenerator.buildUserFavoritesUserIdUri(userId: _userId, token: _token));
+      final favoriteData = jsonDecode(favoritesResponse.body) as Map<String, dynamic>?;
+      extractedData.forEach((key, value) async {
         final productId = key;
         final productData = value;
         loadedProducts.add(ProductItemProvider(
@@ -88,7 +91,7 @@ class ProductsProvider with ChangeNotifier {
           description: productData['description'],
           price: productData['price'],
           imageUrl: productData['imageUrl'],
-          isFavorite: productData['isFavorite'],
+          isFavorite: favoriteData?[productId] ?? false,
         ));
       });
     }
@@ -120,7 +123,6 @@ class ProductsProvider with ChangeNotifier {
           "description": product.description,
           "price": product.price,
           "imageUrl": product.imageUrl,
-          "isFavorite": product.isFavorite,
         },
       ),
     );

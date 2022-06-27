@@ -34,6 +34,7 @@ class MyApp extends StatelessWidget {
           update: (ctx, authProvider, productsProvider) => ProductsProvider(
             items: productsProvider?.items,
             token: authProvider.token,
+            userId: authProvider.userId,
             initialized: productsProvider?.initialized,
           ),
         ),

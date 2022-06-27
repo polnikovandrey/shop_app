@@ -37,11 +37,9 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  bool get isAuth {
-    return token != null;
-  }
+  bool get isAuth => token != null;
 
-  String? get token {
-    return _token != null && _expiryDate != null && _expiryDate!.isAfter(DateTime.now()) ? _token : null;
-  }
+  String? get token => _token != null && _expiryDate != null && _expiryDate!.isAfter(DateTime.now()) ? _token : null;
+
+  String? get userId => _userId;
 }
