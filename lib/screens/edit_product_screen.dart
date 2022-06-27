@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shop_app/providers/product.dart';
+import 'package:shop_app/providers/product_item_provider.dart';
 import 'package:shop_app/providers/products_provider.dart';
 
 class EditProductScreen extends StatefulWidget {
@@ -18,7 +18,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
   final _imageUrlFocusNode = FocusNode();
   final _imageUrlController = TextEditingController();
   final _form = GlobalKey<FormState>();
-  var _editedProduct = Product(id: '', title: '', price: 0, description: '', imageUrl: '');
+  var _editedProduct = ProductItemProvider(id: '', title: '', price: 0, description: '', imageUrl: '');
   var _initValues = {
     'title': '',
     'description': '',
@@ -94,7 +94,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
                         onFieldSubmitted: (value) => FocusScope.of(context).requestFocus(_priceFocusNode),
                         validator: (value) => value == null || value.isEmpty ? 'Please enter a title' : null,
                         onSaved: (value) {
-                          _editedProduct = Product(
+                          _editedProduct = ProductItemProvider(
                             id: _editedProduct.id,
                             title: value ?? '',
                             description: _editedProduct.description,
@@ -123,7 +123,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
                           return validationMessage;
                         },
                         onSaved: (value) {
-                          _editedProduct = Product(
+                          _editedProduct = ProductItemProvider(
                             id: _editedProduct.id,
                             title: _editedProduct.title,
                             description: _editedProduct.description,
@@ -149,7 +149,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
                           return validationMessage;
                         },
                         onSaved: (value) {
-                          _editedProduct = Product(
+                          _editedProduct = ProductItemProvider(
                             id: _editedProduct.id,
                             title: _editedProduct.title,
                             description: value ?? '',
@@ -194,7 +194,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
                                 return validationMessage;
                               },
                               onSaved: (value) {
-                                _editedProduct = Product(
+                                _editedProduct = ProductItemProvider(
                                   id: _editedProduct.id,
                                   title: _editedProduct.title,
                                   description: _editedProduct.description,

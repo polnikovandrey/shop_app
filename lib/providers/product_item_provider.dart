@@ -4,9 +4,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shop_app/models/http_exception.dart';
-import 'package:shop_app/providers/products_provider.dart';
 
-class Product with ChangeNotifier {
+class ProductItemProvider with ChangeNotifier {
+
   final String id;
   final String title;
   final String description;
@@ -14,7 +14,7 @@ class Product with ChangeNotifier {
   final String imageUrl;
   bool isFavorite;
 
-  Product({
+  ProductItemProvider({
     required this.id,
     required this.title,
     required this.description,
@@ -23,13 +23,12 @@ class Product with ChangeNotifier {
     this.isFavorite = false,
   });
 
-  Future<void> toggleFavoriteStatus() async {
+  Future<void> toggleFavoriteStatus(Uri patchProductIdUri) async {
     final oldStatus = isFavorite;
     isFavorite = !isFavorite;
     notifyListeners();
-    final uri = ProductsProvider.buildProductIdUri(id: id);
     try {
-      final response = await http.patch(uri, body: json.encode({'isFavorite': isFavorite}));
+      final response = await http.patch(patchProductIdUri, body: json.encode({'isFavorite': isFavorite}));
       if (response.statusCode != HttpStatus.ok) {
         throw HttpException('Could not make a product favorite');
       }

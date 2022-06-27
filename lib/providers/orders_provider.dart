@@ -2,14 +2,15 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:shop_app/global_constants.dart';
 import 'package:shop_app/providers/cart_provider.dart';
+import 'package:shop_app/uri_generator.dart';
 
 class OrdersProvider with ChangeNotifier {
-  static const ordersCollectionPath = '/orders';
-  static final ordersCollectionUri = Uri.https(GlobalConstants.authority, '$ordersCollectionPath${GlobalConstants.dotJson}');
 
-  final List<OrderItemData> _orders = [];
+  final List<OrderItemData> _orders;
+  final String? _token;
+
+  OrdersProvider({List<OrderItemData>? orders, String? token}) : _orders = orders ?? [], _token = token;
 
   List<OrderItemData> get orders {
     return [..._orders];
@@ -17,7 +18,7 @@ class OrdersProvider with ChangeNotifier {
 
   Future<void> fetchAndSetOrders() async {
     final List<OrderItemData> loadedOrders = [];
-    final response = await http.get(ordersCollectionUri);
+    final response = await http.get(UriGenerator.buildOrdersCollectionUri(_token));
     final extractedData = json.decode(response.body);
     if (extractedData != null) {
       extractedData.forEach((id, order) {
@@ -46,7 +47,7 @@ class OrdersProvider with ChangeNotifier {
 
   Future<void> addOrder(List<CartItemData> cartProducts, double amount) async {
     final timestamp = DateTime.now();
-    final response = await http.post(ordersCollectionUri,
+    final response = await http.post(UriGenerator.buildOrdersCollectionUri(_token),
         body: json.encode({
           'amount': amount,
           'dateTime': timestamp.toIso8601String(),
