@@ -24,11 +24,24 @@ class AuthProvider with ChangeNotifier {
         'returnSecureToken': true,
       }));
       final responseData = json.decode(response.body);
-      if (responseData['error'] != null) {
+      if (responseData['error'] == null) {
+        _token = responseData['idToken'];
+        _userId = responseData['localId'];
+        _expiryDate = DateTime.now().add(Duration(seconds: int.parse(responseData['expiresIn'])));
+        notifyListeners();
+      } else {
         throw HttpException(responseData['error']['message']);
       }
     } catch(_) {
       rethrow;
     }
+  }
+
+  bool get isAuth {
+    return token != null;
+  }
+
+  String? get token {
+    return _token != null && _expiryDate != null && _expiryDate!.isAfter(DateTime.now()) ? _token : null;
   }
 }
