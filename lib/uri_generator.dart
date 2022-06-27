@@ -1,14 +1,22 @@
-
 import 'global_constants.dart';
 
 class UriGenerator {
-
   static const productsCollectionPath = '/products';
   static const ordersCollectionPath = '/orders';
   static const userFavoritesPath = '/userFavorites';
 
-  static Uri buildProductsCollectionUri({String? token}) =>
-      Uri.https(GlobalConstants.authority, '$productsCollectionPath${GlobalConstants.dotJson}', UriGenerator.buildAuthQueryParameters(token));
+  static Uri buildProductsCollectionUri({String? token}) => buildProductsCollectionFilteredByUserIdUri(token: token);
+
+  static Uri buildProductsCollectionFilteredByUserIdUri({String? token, String? userId}) {
+    var queryParameters = UriGenerator.buildAuthQueryParameters(token);
+    queryParameters.addAll(userId == null
+        ? {}
+        : {
+            'orderBy': '"creatorId"',
+            'equalTo': '"$userId"',
+          });
+    return Uri.https(GlobalConstants.authority, '$productsCollectionPath${GlobalConstants.dotJson}', queryParameters);
+  }
 
   static Uri buildProductIdUri({required String id, String? token}) =>
       Uri.https(GlobalConstants.authority, '$productsCollectionPath/$id/${GlobalConstants.dotJson}', UriGenerator.buildAuthQueryParameters(token));

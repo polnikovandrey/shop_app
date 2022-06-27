@@ -77,7 +77,7 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
     setState(() => _isLoading = true);
     var productsProvider = Provider.of<ProductsProvider>(context, listen: false);
     await productsProvider.deleteAllProductsAndSetDummyData();
-    await productsProvider.fetchAndSetProducts();
+    await productsProvider.fetchAndSetProducts(false);
     setState(() => _isLoading = false);
   }
 }

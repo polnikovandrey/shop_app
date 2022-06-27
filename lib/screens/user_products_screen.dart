@@ -12,7 +12,7 @@ class UserProductsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final products = Provider.of<ProductsProvider>(context);
+    final productsProvider = Provider.of<ProductsProvider>(context, listen: false);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Your Products'),
@@ -24,23 +24,30 @@ class UserProductsScreen extends StatelessWidget {
         ],
       ),
       drawer: const AppDrawer(),
-      body: RefreshIndicator(
-        onRefresh: () => products.fetchAndSetProducts(),
-        child: Padding(
-          padding: const EdgeInsets.all(8),
-          child: ListView.builder(
-            itemCount: products.items.length,
-            itemBuilder: (ctx, index) {
-              var product = products.items[index];
-              return UserProductItem(
-                id: product.id,
-                title: product.title,
-                imageUrl: product.imageUrl,
-                key: ValueKey(product.id),
-              );
-            },
-          ),
-        ),
+      body: FutureBuilder(
+        future: productsProvider.fetchAndSetProducts(true),
+        builder: (ctx, snapshot) => snapshot.connectionState == ConnectionState.waiting
+            ? const Center(child: CircularProgressIndicator())
+            : RefreshIndicator(
+                onRefresh: () => productsProvider.fetchAndSetProducts(true),
+                child: Consumer<ProductsProvider>(
+                  builder: (context, productsProvider, child) => Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: ListView.builder(
+                      itemCount: productsProvider.items.length,
+                      itemBuilder: (ctx, index) {
+                        var product = productsProvider.items[index];
+                        return UserProductItem(
+                          id: product.id,
+                          title: product.title,
+                          imageUrl: product.imageUrl,
+                          key: ValueKey(product.id),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
       ),
     );
   }
