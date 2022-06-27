@@ -2,9 +2,8 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shop_app/models/auth_mode.dart';
 import 'package:shop_app/providers/auth_provider.dart';
-
-enum AuthMode { signup, login }
 
 class AuthScreen extends StatelessWidget {
   static const routeName = '/auth';
@@ -111,14 +110,10 @@ class AuthCardState extends State<AuthCard> {
     setState(() {
       _isLoading = true;
     });
-    if (_authMode == AuthMode.login) {
-      // Log user in
-    } else {
-      // Sign user up
-      var email = _authData['email'] ?? '';
-      var password = _authData['password'] ?? '';
-      await Provider.of<AuthProvider>(context, listen: false).signup(email, password);
-    }
+    var email = _authData['email'] ?? '';
+    var password = _authData['password'] ?? '';
+    var authProvider = Provider.of<AuthProvider>(context, listen: false);
+    await authProvider.authenticate(email, password, _authMode);
     setState(() {
       _isLoading = false;
     });
