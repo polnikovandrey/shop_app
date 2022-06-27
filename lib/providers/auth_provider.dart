@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -16,11 +17,18 @@ class AuthProvider with ChangeNotifier {
   Future<void> authenticate(String email, String password, AuthMode authMode) async {
     final String authMethod = AuthMode.signup == authMode ? authMethodSignUp : authMethodSignIn;
     final uri = Uri.parse('https://identitytoolkit.googleapis.com/v1/accounts:$authMethod?key=$apiKey');
-    final response = await http.post(uri, body: json.encode({
-      'email': email,
-      'password': password,
-      'returnSecureToken': true,
-    }));
-    print(json.decode(response.body));
+    try {
+      final response = await http.post(uri, body: json.encode({
+        'email': email,
+        'password': password,
+        'returnSecureToken': true,
+      }));
+      final responseData = json.decode(response.body);
+      if (responseData['error'] != null) {
+        throw HttpException(responseData['error']['message']);
+      }
+    } catch(_) {
+      rethrow;
+    }
   }
 }
