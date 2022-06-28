@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -13,6 +14,7 @@ class AuthProvider with ChangeNotifier {
   String? _token;
   String? _userId;
   DateTime? _expiryDate;
+  Timer? _authTimer;
 
   Future<void> authenticate(String email, String password, AuthMode authMode) async {
     final String authMethod = AuthMode.signup == authMode ? authMethodSignUp : authMethodSignIn;
@@ -28,6 +30,7 @@ class AuthProvider with ChangeNotifier {
         _token = responseData['idToken'];
         _userId = responseData['localId'];
         _expiryDate = DateTime.now().add(Duration(seconds: int.parse(responseData['expiresIn'])));
+        _autoLogout();
         notifyListeners();
       } else {
         throw HttpException(responseData['error']['message']);
@@ -41,7 +44,17 @@ class AuthProvider with ChangeNotifier {
     _token = null;
     _userId = null;
     _expiryDate = null;
+    _authTimer?.cancel();
+    _authTimer = null;
     notifyListeners();
+  }
+
+  void _autoLogout() {
+    _authTimer?.cancel();
+    int? timeToExpiry = _expiryDate?.difference(DateTime.now()).inSeconds;
+    if (timeToExpiry != null) {
+      _authTimer = Timer(Duration(seconds: timeToExpiry), logout);
+    }
   }
 
   bool get isAuth => token != null;
