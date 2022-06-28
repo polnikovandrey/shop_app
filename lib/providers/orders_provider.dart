@@ -6,11 +6,14 @@ import 'package:shop_app/providers/cart_provider.dart';
 import 'package:shop_app/uri_generator.dart';
 
 class OrdersProvider with ChangeNotifier {
-
   final List<OrderItemData> _orders;
   final String? _token;
+  final String? _userId;
 
-  OrdersProvider({List<OrderItemData>? orders, String? token}) : _orders = orders ?? [], _token = token;
+  OrdersProvider({List<OrderItemData>? orders, String? token, String? userId})
+      : _orders = orders ?? [],
+        _token = token,
+        _userId = userId;
 
   List<OrderItemData> get orders {
     return [..._orders];
@@ -18,7 +21,7 @@ class OrdersProvider with ChangeNotifier {
 
   Future<void> fetchAndSetOrders() async {
     final List<OrderItemData> loadedOrders = [];
-    final response = await http.get(UriGenerator.buildOrdersCollectionUri(_token));
+    final response = await http.get(UriGenerator.buildOrdersCollectionUri(_token, _userId));
     final extractedData = json.decode(response.body);
     if (extractedData != null) {
       extractedData.forEach((id, order) {
@@ -28,12 +31,12 @@ class OrdersProvider with ChangeNotifier {
             amount: order['amount'],
             products: (order['products'] as List<dynamic>)
                 .map((cartItemJson) => CartItemData(
-              id: cartItemJson['id'],
-              productId: cartItemJson['productId'],
-              title: cartItemJson['title'],
-              price: cartItemJson['price'],
-              quantity: cartItemJson['quantity'],
-            ))
+                      id: cartItemJson['id'],
+                      productId: cartItemJson['productId'],
+                      title: cartItemJson['title'],
+                      price: cartItemJson['price'],
+                      quantity: cartItemJson['quantity'],
+                    ))
                 .toList(),
             dateTime: DateTime.parse(order['dateTime']),
           ),
@@ -47,7 +50,7 @@ class OrdersProvider with ChangeNotifier {
 
   Future<void> addOrder(List<CartItemData> cartProducts, double amount) async {
     final timestamp = DateTime.now();
-    final response = await http.post(UriGenerator.buildOrdersCollectionUri(_token),
+    final response = await http.post(UriGenerator.buildOrdersCollectionUri(_token, _userId),
         body: json.encode({
           'amount': amount,
           'dateTime': timestamp.toIso8601String(),

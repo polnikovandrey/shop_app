@@ -21,7 +21,8 @@ class UriGenerator {
   static Uri buildProductIdUri({required String id, String? token}) =>
       Uri.https(GlobalConstants.authority, '$productsCollectionPath/$id/${GlobalConstants.dotJson}', UriGenerator.buildAuthQueryParameters(token));
 
-  static Uri buildOrdersCollectionUri(String? token) => Uri.https(GlobalConstants.authority, '$ordersCollectionPath${GlobalConstants.dotJson}', buildAuthQueryParameters(token));
+  static Uri buildOrdersCollectionUri(String? token, String? userId) => Uri.https(GlobalConstants.authority, '$ordersCollectionPath/$userId${GlobalConstants.dotJson}',
+      buildAuthQueryParameters(token));
 
   static Uri buildUserFavoritesUserIdProductIdUri({required String? userId, required String productId, String? token}) =>
       Uri.https(GlobalConstants.authority, '$userFavoritesPath/$userId/$productId/${GlobalConstants.dotJson}', UriGenerator.buildAuthQueryParameters(token));
