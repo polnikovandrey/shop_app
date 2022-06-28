@@ -103,26 +103,34 @@ class AuthCardState extends State<AuthCard> with SingleTickerProviderStateMixin 
   };
   var _isLoading = false;
   final _passwordController = TextEditingController();
-  AnimationController? _animationController;
-  Animation<Size>? _heightAnimation;
+  late AnimationController _animationController;
+  late Animation<Offset> _slideAnimation;
+  late Animation<double> _opacityAnimation;
 
   @override
   void initState() {
     super.initState();
     _animationController = AnimationController(vsync: this, duration: const Duration(milliseconds: 300));
-    _heightAnimation = Tween<Size>(
-      begin: const Size(double.infinity, logInCardHeight),
-      end: const Size(double.infinity, signUpCardHeight),
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, -1.5),
+      end: const Offset(0, 0),
     ).animate(CurvedAnimation(
-      parent: _animationController!,
+      parent: _animationController,
       curve: Curves.linear,
+    ));
+    _opacityAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeIn,
     ));
   }
 
   @override
   void dispose() {
     super.dispose();
-    _animationController?.dispose();
+    _animationController.dispose();
   }
 
   void _submit() async {
@@ -166,11 +174,9 @@ class AuthCardState extends State<AuthCard> with SingleTickerProviderStateMixin 
 
   void _switchAuthMode() {
     final newMode = _authMode == AuthMode.login ? AuthMode.signup : AuthMode.login;
-    final heightAnimationMode = newMode == AuthMode.signup ? _animationController?.forward : _animationController?.reverse;
+    final animationMode = newMode == AuthMode.signup ? _animationController.forward : _animationController.reverse;
     setState(() => _authMode = newMode);
-    if (heightAnimationMode != null) {
-      heightAnimationMode();
-    }
+    animationMode();
   }
 
   @override
@@ -221,21 +227,31 @@ class AuthCardState extends State<AuthCard> with SingleTickerProviderStateMixin 
                     _authData['password'] = value!;
                   },
                 ),
-                if (_authMode == AuthMode.signup)
-                  TextFormField(
-                    enabled: _authMode == AuthMode.signup,
-                    decoration: const InputDecoration(labelText: 'Confirm Password'),
-                    obscureText: true,
-                    validator: _authMode == AuthMode.signup
-                        ? (value) {
-                            if (value != _passwordController.text) {
-                              return 'Passwords do not match!';
-                            } else {
-                              return null;
-                            }
-                          }
-                        : null,
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  constraints: BoxConstraints(minHeight: _authMode == AuthMode.signup ? 60 : 0, maxHeight: _authMode == AuthMode.signup ? 120 : 0),
+                  curve: Curves.easeIn,
+                  child: FadeTransition(
+                    opacity: _opacityAnimation,
+                    child: SlideTransition(
+                      position: _slideAnimation,
+                      child: TextFormField(
+                        enabled: _authMode == AuthMode.signup,
+                        decoration: const InputDecoration(labelText: 'Confirm Password'),
+                        obscureText: true,
+                        validator: _authMode == AuthMode.signup
+                            ? (value) {
+                                if (value != _passwordController.text) {
+                                  return 'Passwords do not match!';
+                                } else {
+                                  return null;
+                                }
+                              }
+                            : null,
+                      ),
+                    ),
                   ),
+                ),
                 const SizedBox(
                   height: 20,
                 ),
