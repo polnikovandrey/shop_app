@@ -11,8 +11,8 @@ class AuthProvider with ChangeNotifier {
   static const authMethodSignIn = 'signInWithPassword';
 
   String? _token;
-  DateTime? _expiryDate;
   String? _userId;
+  DateTime? _expiryDate;
 
   Future<void> authenticate(String email, String password, AuthMode authMode) async {
     final String authMethod = AuthMode.signup == authMode ? authMethodSignUp : authMethodSignIn;
@@ -35,6 +35,13 @@ class AuthProvider with ChangeNotifier {
     } catch(_) {
       rethrow;
     }
+  }
+
+  void logout() {
+    _token = null;
+    _userId = null;
+    _expiryDate = null;
+    notifyListeners();
   }
 
   bool get isAuth => token != null;
