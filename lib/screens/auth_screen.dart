@@ -91,7 +91,10 @@ class AuthCard extends StatefulWidget {
   AuthCardState createState() => AuthCardState();
 }
 
-class AuthCardState extends State<AuthCard> {
+class AuthCardState extends State<AuthCard> with SingleTickerProviderStateMixin {
+  static const logInCardHeight = 260.0;
+  static const signUpCardHeight = 320.0;
+
   final GlobalKey<FormState> _formKey = GlobalKey();
   AuthMode _authMode = AuthMode.login;
   final Map<String, String> _authData = {
@@ -100,6 +103,29 @@ class AuthCardState extends State<AuthCard> {
   };
   var _isLoading = false;
   final _passwordController = TextEditingController();
+  AnimationController? _animationController;
+  Animation<Size>? _heightAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(vsync: this, duration: const Duration(milliseconds: 300));
+    _heightAnimation = Tween<Size>(
+      begin: const Size(double.infinity, logInCardHeight),
+      end: const Size(double.infinity, signUpCardHeight),
+    ).animate(CurvedAnimation(
+      parent: _animationController!,
+      curve: Curves.linear,
+    ));
+    _heightAnimation?.addListener(() => setState(() {}));
+  }
+
+
+  @override
+  void dispose() {
+    super.dispose();
+    _animationController?.dispose();
+  }
 
   void _submit() async {
     var currentState = _formKey.currentState;
@@ -141,14 +167,11 @@ class AuthCardState extends State<AuthCard> {
   }
 
   void _switchAuthMode() {
-    if (_authMode == AuthMode.login) {
-      setState(() {
-        _authMode = AuthMode.signup;
-      });
-    } else {
-      setState(() {
-        _authMode = AuthMode.login;
-      });
+    final newMode = _authMode == AuthMode.login ? AuthMode.signup : AuthMode.login;
+    final heightAnimationMode = newMode == AuthMode.signup ? _animationController?.forward : _animationController?.reverse;
+    setState(() => _authMode = newMode);
+    if (heightAnimationMode != null) {
+      heightAnimationMode();
     }
   }
 
@@ -161,8 +184,8 @@ class AuthCardState extends State<AuthCard> {
       ),
       elevation: 8.0,
       child: Container(
-        height: _authMode == AuthMode.signup ? 320 : 260,
-        constraints: BoxConstraints(minHeight: _authMode == AuthMode.signup ? 320 : 260),
+        height: _heightAnimation?.value.height,
+        constraints: BoxConstraints(minHeight: _heightAnimation?.value.height ?? 0.0),
         width: deviceSize.width * 0.75,
         padding: const EdgeInsets.all(16.0),
         child: Form(
