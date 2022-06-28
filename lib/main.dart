@@ -11,6 +11,7 @@ import 'package:shop_app/screens/orders_screen.dart';
 import 'package:shop_app/screens/product_detail_screen.dart';
 import 'package:shop_app/screens/products_overview_screen.dart';
 import 'package:shop_app/screens/user_products_screen.dart';
+import 'package:shop_app/widgets/splash_screen.dart';
 
 void main() => runApp(const MyApp());
 
@@ -51,7 +52,14 @@ class MyApp extends StatelessWidget {
             fontFamily: 'Lato',
           ),
           routes: {
-            rootRouteName: (ctx) => authProvider.isAuth ? const ProductsOverviewScreen() : const AuthScreen(),
+            rootRouteName: (ctx) => authProvider.isAuth
+                ? const ProductsOverviewScreen()
+                : FutureBuilder(
+                    future: authProvider.tryAutologin(),
+                    builder: (ctx, authProvider) {
+                      return authProvider.connectionState == ConnectionState.waiting ? const SplashScreen() : const AuthScreen();
+                    },
+                  ),
             ProductsOverviewScreen.routeName: (ctx) => const ProductsOverviewScreen(),
             ProductDetailScreen.routeName: (ctx) => const ProductDetailScreen(),
             CartScreen.routeName: (ctx) => const CartScreen(),

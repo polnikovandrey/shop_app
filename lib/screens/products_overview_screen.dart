@@ -75,9 +75,10 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
 
   Future<void> _reInitAndFetchAndSetProducts() async {
     setState(() => _isLoading = true);
-    var productsProvider = Provider.of<ProductsProvider>(context, listen: false);
-    await productsProvider.deleteAllProductsAndSetDummyData();
-    await productsProvider.fetchAndSetProducts(false);
+    await Provider.of<ProductsProvider>(context, listen: false).deleteAllProductsAndSetDummyData();
+    if (mounted) {
+      await Provider.of<ProductsProvider>(context, listen: false).fetchAndSetProducts(false);
+    }
     setState(() => _isLoading = false);
   }
 }
